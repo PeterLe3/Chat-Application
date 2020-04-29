@@ -3,7 +3,7 @@ const socketio = require('socket.io');
 const http = require('http');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const saltRounds = 10;
+const jwt = require('jsonwebtoken');
 
 
 const bodyParser = require('body-parser');
@@ -30,7 +30,6 @@ var User = require('./models/Users');
 
 
 
-
 app.use(bodyParser.urlencoded({extened:true}));
 app.use(bodyParser.json());
 
@@ -38,36 +37,50 @@ app.use(cors());
 app.use(router);
 
 
-
 app.post('/api/login',function(req,res) {
     const email = req.body.email;
     const password = req.body.password;
-    //console.log('test');
+    const name = req.body.name;
     User.findOne({
         where: {
             email:email
         }
-    }).then(user => {
-       let hash = user.dataValues.password;
-       bcrypt.compare(password,hash,function(err,result){
-           if(result) {
-               console.log('User logged in');
-           }
-           else{
-            res.status(400).send({
-                message: `Password was incorrect`
+    }).then(function(user){
+        if(user){
+            let hash =  user.dataValues.password;
+            let id = user.dataValues.id;
+            bcrypt.compare(password,hash,function(err,result){
+             
+                if(result) {
+                    console.log('User logged in');
+                    const payload = {id,email,name};
+                    jwt.sign({payload},'secretkey', (err,token) =>{
+                        res.json({token});
+                    })
+                    
+                }
+                // error for if password is incorrect for user
+                else{ 
+                 res.status(400).send({
+                     message: `Password was incorrect`
+                 })
+            
+             }  
+     
             })
-       
-        }  
 
-       })
-    
+        }
+        //error for if user doesn't exist in DB
+        else{
+            res.status(400).send({
+                message: `User does not exist`
+            })
+
+        }
     })
-
+    
     
 })
-
-
 
 app.post('/api/register',function(req,res) {
     const email = req.body.email;
@@ -152,6 +165,25 @@ io.on('connection', (socket) => {
     })
 }) 
 
+// veryify token function
+function verifyToken(req,res,next) {
+    //get auth header value
+    const bearerHeader = req.headers['authorization'];
 
+    if(typeof bearerHeader !== 'undefined') {
+
+    const bearer = bearerHeader.split(' ');
+
+    const bearerToken = bearer[1];
+    req.token = bearerToken;
+
+    //call next Middleware
+    next();
+    }
+    else {
+        //Forbidden 
+        res.sendStatus(403);
+    }
+}
 //${PORT} is template literal in ES6, required backtick not quotes
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));

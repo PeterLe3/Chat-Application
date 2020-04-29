@@ -8,9 +8,7 @@ import Alert from '../Alert/Alert';
 const Register = () => {
 
     const history = useHistory();
-    const [room,setRoom] = useState('');
 
-    const [register,setRegister] = useState(false);
     const [email, setEmail] = useState('');
     const [password,setPassword] = useState('');
     const[name,setName] = useState('');
@@ -39,12 +37,13 @@ const Register = () => {
             "password": password
         }
         if(validInput(payload)) {
+            
           
         
         axios.post(`http://localhost:5000/api/register`,payload)
             .then(function(response) {
-                console.log()
-              setRegister(true);
+                console.log('redirecting...');
+                history.push("/"); 
 
             })
             .catch(function(errors){
@@ -52,10 +51,7 @@ const Register = () => {
                 setError(error);
                 
             })
-        if({register}) {
-            console.log('redirecting...');
-            history.push("/"); 
-        }
+      
     }
 
     }

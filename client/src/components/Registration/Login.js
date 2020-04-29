@@ -1,4 +1,4 @@
-import React,{useState} from 'react';
+import React,{useState, useEffect, useRef} from 'react';
 import {Link} from 'react-router-dom';
 import {useHistory} from 'react-router-dom';
 import  './Login.css';
@@ -6,15 +6,16 @@ import axios from 'axios';
 import Alert from '../Alert/Alert';
 
 const Login = () => {
-    const history = useHistory();
-    const[name,setName] = useState('');
-    const [room,setRoom] = useState('');
 
-    const [logIn,setLogIn] = useState(false);
+    const history = useHistory();
+
+
 
     const[error,setError] = useState('');
     const [email, setEmail] = useState('');
     const [password,setPassword] = useState('');
+
+
     const handleSubmitClick = (e) => {
         const payload = {
             "email" : email,
@@ -22,16 +23,15 @@ const Login = () => {
         }
         axios.post(`http://localhost:5000/api/login`,payload)
             .then(function(response) {
-                setLogIn(true);
+                history.push("/Join"); 
+              
             })
             .catch(function(errors){
                 let error = errors.response.data.message;
                 setError(error);
             })
-        if({logIn}){
-            console.log('redirecting...');
-            history.push("/Join"); 
-        }
+     
+    
     }
     return(
         <div className =  "joinOuterContainer">
