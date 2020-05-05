@@ -17,7 +17,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketio(server);
 
-var db = require('./db');
+const db = require('./db');
 
 db.authenticate()
   .then(() => {

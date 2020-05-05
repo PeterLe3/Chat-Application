@@ -4,6 +4,7 @@ import {useHistory} from 'react-router-dom';
 import  './Login.css';
 import axios from 'axios';
 import Alert from '../Alert/Alert';
+import auth from '../Auth/Auth';
 
 const Login = () => {
 
@@ -23,7 +24,12 @@ const Login = () => {
         }
         axios.post(`http://localhost:5000/api/login`,payload)
             .then(function(response) {
-                history.push("/Join"); 
+                console.log('i am trying to login lol');
+                auth.login(() => {
+                    console.log('does htis work');
+                    history.push("/Join"); 
+                })
+        
               
             })
             .catch(function(errors){
