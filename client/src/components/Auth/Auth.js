@@ -1,19 +1,25 @@
+import Cookies from 'js-cookie';
 class Auth {
-    constructor() {
-        this.auth = false;
-    }
-    login(cb) {
-        console.log('hello world');
-        this.auth = true;
+    login(token,cb) {
+        console.log("token:",token);
+        Cookies.set('token',token);
+
         cb();
     }
     logout(cb) {
-        console.log('hello world');
-        this.auth = false;
+        Cookies.remove('token');
+        console.log('I am removing token: ',Cookies.get('token'));
+        
         cb();
     }
     isAuth(){
-        return this.auth;
+        console.log("Token:",Cookies.get('token'));
+       if(Cookies.get('token')) {
+           return true;
+       }
+       else{
+           return false;
+       }
     }
 }
 export default new Auth();

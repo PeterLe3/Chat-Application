@@ -24,8 +24,9 @@ const Login = () => {
         }
         axios.post(`http://localhost:5000/api/login`,payload)
             .then(function(response) {
-                console.log('i am trying to login lol');
-                auth.login(() => {
+                let token = response.data.token;
+             
+                auth.login(token,() => {
                     console.log('does htis work');
                     history.push("/Join"); 
                 })
@@ -33,8 +34,9 @@ const Login = () => {
               
             })
             .catch(function(errors){
-                let error = errors.response.data.message;
-                setError(error);
+          //  let error = errors.response.data.message;
+          console.log(errors);
+                setError(errors);
             })
      
     

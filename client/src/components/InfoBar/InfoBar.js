@@ -1,10 +1,10 @@
 import React from 'react';
 
 import './InfoBar.css';
-import auth from '../Auth/Auth';
 import {useHistory} from 'react-router-dom';
 import closeIcon from '../../icons/closeIcon.png';
 import onlineIcon from '../../icons/onlineIcon.png';
+import auth from '../Auth/Auth';
 
 const InfoBar = ({room}) => {
     const history = useHistory();
