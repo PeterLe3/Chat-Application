@@ -1,6 +1,5 @@
-import React,{useState, useEffect, useRef} from 'react';
-import {Link} from 'react-router-dom';
-import {useHistory} from 'react-router-dom';
+import React,{useState} from 'react';
+import {Link,useHistory} from 'react-router-dom';
 import  './Login.css';
 import axios from 'axios';
 import Alert from '../Alert/Alert';
@@ -9,9 +8,6 @@ import auth from '../Auth/Auth';
 const Login = () => {
 
     const history = useHistory();
-
-
-
     const[error,setError] = useState('');
     const [email, setEmail] = useState('');
     const [password,setPassword] = useState('');
@@ -27,16 +23,15 @@ const Login = () => {
                 let token = response.data.token;
              
                 auth.login(token,() => {
-                    console.log('does htis work');
                     history.push("/Join"); 
                 })
         
               
             })
             .catch(function(errors){
-          //  let error = errors.response.data.message;
-          console.log(errors);
-                setError(errors);
+            let error = errors.response.data.message;
+
+                setError(error);
             })
      
     

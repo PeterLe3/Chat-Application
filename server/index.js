@@ -4,6 +4,8 @@ const http = require('http');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const session = require('express-session');
+var ssn;
 
 
 const bodyParser = require('body-parser');
@@ -27,6 +29,8 @@ db.authenticate()
     console.error('Unable to connect to the database:', err);
   });
 var User = require('./models/Users');
+var Room = require('./models/Room');
+var UsersInRoom = require('./models/UsersInRoom');
 
 
 
@@ -36,19 +40,29 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(router);
 
+app.use(session({
+    secret:'shhh',
+    resave: false,
+    saveUnitialized:true,
+    cookie: {secure:true}
+}));
+
 
 app.post('/api/login',function(req,res) {
+    ssn = req.session;
+    ssn.email = req.body.email;
     const email = req.body.email;
     const password = req.body.password;
     const name = req.body.name;
     User.findOne({
         where: {
-            email:email
+            email
         }
     }).then(function(user){
         if(user){
             let hash =  user.dataValues.password;
             let id = user.dataValues.id;
+            ssn.id = id;
             bcrypt.compare(password,hash,function(err,result){
              
                 if(result) {
@@ -82,6 +96,29 @@ app.post('/api/login',function(req,res) {
     
 })
 
+app.post('/api/JoinChat',function(req,res) {
+    const RoomName = req.body.roomName;
+    Room.findOrCreate({
+        where: {
+            RoomName
+        }
+    }).spread(function(room,created){
+        if(created){
+            console.log('Room exists');
+            res.end();
+            
+        }
+        else{
+            Room.create({
+                RoomName
+            })
+        }
+    })
+
+
+
+})
+
 app.post('/api/register',function(req,res) {
     const email = req.body.email;
     const name  = req.body.name;
@@ -90,9 +127,9 @@ app.post('/api/register',function(req,res) {
     bcrypt.genSalt(function(err,salt){
         bcrypt.hash(password,salt,function(error,hash) {
             User.findOrCreate({
-                where:{email:email},
+                where:{email},
                 defaults:{
-                    name:name,
+                    name,
                     password:hash
                 }
             }
@@ -113,7 +150,6 @@ app.post('/api/register',function(req,res) {
     });
  
    })
-    //console.log('test');
 
 })
 
@@ -126,9 +162,28 @@ app.post('/api/register',function(req,res) {
 io.on('connection', (socket) => {
     console.log('We have a new connection!');
    
-
     //listen for user join event and prints out name and room 
     socket.on('join', ({name,room}, callback) => {
+        
+        /*let id = ssn.id;
+        console.log(id);
+        
+        UsersInRoom.findOrCreate({
+            where:{email: ssn.email},
+            defaults:{
+                name:name,
+                password:hash
+            }
+        }
+       )
+       .spread(function(user,created) {
+         if(created) {
+            console.log(`${user} in room`); 
+         }
+        })
+    
+        
+        */
         const {error, user} = addUser({id:socket.id, name, room});
         
         if(error) return callback(error);
